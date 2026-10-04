@@ -48,7 +48,13 @@ jobs:
 
       - run: brew test-bot --only-setup
 
-      - run: brew test-bot --only-tap-syntax
+      # Equivalent of `brew test-bot --only-tap-syntax`, which can't be configured per tap. goreleaser
+      # generates casks with `postflight do` (https://github.com/goreleaser/goreleaser/issues/6870), so
+      # the Cask/InstallSteps cop is skipped, and readall/audit run without developer mode (which test-bot
+      # enables), as that turns the `postflight` deprecation warning into an error.
+      - run: brew style --except-cops=Cask/InstallSteps oliviermichaelis/tap
+      - run: brew readall --aliases --os=all --arch=all oliviermichaelis/tap
+      - run: brew audit --except=installed --tap=oliviermichaelis/tap
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
 
